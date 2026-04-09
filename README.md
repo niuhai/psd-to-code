@@ -1,6 +1,6 @@
 # DesignMatch - PSD Toolkit
 
-A powerful web-based tool for PSD file processing, code generation, and slicing. Built with React, Node.js, and TypeScript.
+A powerful web-based tool for PSD file processing, code generation, and slicing. Built with Vue 3, Node.js, and TypeScript.
 
 ## Features
 
@@ -101,11 +101,11 @@ A powerful web-based tool for PSD file processing, code generation, and slicing.
 ## Technology Stack
 
 ### Frontend
-- React 18
+- Vue 3
 - TypeScript
 - Vite
 - Tailwind CSS
-- Lucide React (icons)
+- Lucide Vue Next (icons)
 
 ### Backend
 - Node.js
@@ -128,10 +128,10 @@ A powerful web-based tool for PSD file processing, code generation, and slicing.
 │   ├── app.ts           # Express app
 │   └── server.ts        # Server entry point
 ├── src/                 # Frontend
-│   ├── components/      # React components
+│   ├── components/      # Vue components
 │   ├── pages/           # Page components
 │   ├── utils/           # Utility functions
-│   └── main.tsx         # Frontend entry point
+│   └── main.ts          # Frontend entry point
 ├── public/              # Static files
 │   ├── temp/            # Temporary files
 │   └── slices/          # Generated slices
