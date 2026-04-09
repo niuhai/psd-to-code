@@ -13,7 +13,7 @@
       </div>
 
       <div v-if="!designPath" class="glass-card rounded-3xl p-12 text-center">
-        <Empty class="w-20 h-20 mx-auto mb-6 text-slate-500" />
+        <FileQuestion class="w-20 h-20 mx-auto mb-6 text-slate-500" />
         <h3 class="text-xl font-bold text-white mb-2">No comparison data found</h3>
         <p class="text-slate-400 mb-8">Please run a comparison first</p>
         <button
@@ -127,7 +127,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ArrowLeft, Empty } from 'lucide-vue-next'
+import { ArrowLeft, FileQuestion } from 'lucide-vue-next'
 import type { Differences } from '../utils/api'
 
 const router = useRouter()
@@ -148,7 +148,7 @@ onMounted(() => {
     try {
       differenceData.value = JSON.parse(route.query.differenceData as string)
     } catch (error) {
-      console.error('Failed to parse difference data:', error)
+      // Error parsing difference data, will use null instead
     }
   }
 })

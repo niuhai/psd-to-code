@@ -171,7 +171,6 @@ const handleCompare = async () => {
     differenceData.value = compareResult.differences
   } catch (err) {
     error.value = 'An error occurred during comparison. Please try again.'
-    console.error(err)
   } finally {
     isProcessing.value = false
   }
