@@ -73,11 +73,22 @@
         </div>
       </div>
 
-      <div v-if="designPath" class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto animate-fade-in-up">
+      <div v-if="designPath" class="mt-10 max-w-7xl mx-auto animate-fade-in-up">
+        <div class="glass-card rounded-3xl p-6 md:p-8">
+          <LayerSelector
+            :filePath="designPath"
+            @update:selectedLayers="selectedLayers = $event"
+            @onError="handleError"
+          />
+        </div>
+      </div>
+
+      <div v-if="designPath && selectedLayers.length > 0" class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto animate-fade-in-up">
         <div class="glass-card rounded-3xl p-6 md:p-8">
           <CodeGenerator
             :filePath="designPath"
             :fileName="fileName"
+            :selectedLayers="selectedLayers"
             @onError="handleError"
           />
         </div>
@@ -85,6 +96,7 @@
           <SlicingTool
             :filePath="designPath"
             :fileName="fileName"
+            :selectedLayers="selectedLayers"
             @onError="handleError"
           />
         </div>
@@ -119,6 +131,7 @@ import ComparisonSettings from '../components/ComparisonSettings.vue'
 import ResultDisplay from '../components/ResultDisplay.vue'
 import CodeGenerator from '../components/CodeGenerator.vue'
 import SlicingTool from '../components/SlicingTool.vue'
+import LayerSelector from '../components/LayerSelector.vue'
 import { captureScreenshot, compareImages, type Differences } from '../utils/api'
 import { Layers, Zap, CheckCircle2 } from 'lucide-vue-next'
 
@@ -135,11 +148,13 @@ const differences = ref<number>(0)
 const differenceData = ref<Differences | null>(null)
 const isProcessing = ref<boolean>(false)
 const error = ref<string>('')
+const selectedLayers = ref<string[]>([])
 
 const handleFileUpload = (filePath: string, uploadedFileName: string) => {
   designPath.value = filePath
   fileName.value = uploadedFileName
   error.value = ''
+  selectedLayers.value = []
 }
 
 const handleError = (errorMessage: string) => {

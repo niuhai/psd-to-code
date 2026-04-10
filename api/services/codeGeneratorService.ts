@@ -1,6 +1,6 @@
 const codeGeneratorService = {
   // 生成 styled-components 代码
-  generateStyledComponents: (designInfo) => {
+  generateStyledComponents: (designInfo, selectedLayerIds = [], assetPath = '/src/assets/slices') => {
     try {
       console.log('Generating styled-components code...');
       
@@ -8,21 +8,26 @@ const codeGeneratorService = {
         throw new Error('Invalid design information');
       }
       
-      const components = designInfo.layers
-        .filter(layer => layer.visible && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0)
-        .map(layer => {
-          const componentName = codeGeneratorService.toPascalCase(layer.name);
-          const styles = codeGeneratorService.generateStyledComponentStyles(layer);
-          
-          return `export const ${componentName} = styled.div\`
+      const filteredLayers = selectedLayerIds.length > 0 
+        ? designInfo.layers.filter(layer => selectedLayerIds.includes(layer.id) && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0)
+        : designInfo.layers.filter(layer => layer.visible && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0);
+      
+      const components = filteredLayers.map(layer => {
+        const componentName = codeGeneratorService.toPascalCase(layer.name);
+        const styles = codeGeneratorService.generateStyledComponentStyles(layer);
+        
+        return `export const ${componentName} = styled.div\`
   position: absolute;
   left: ${layer.bounds.left}px;
   top: ${layer.bounds.top}px;
   width: ${layer.bounds.width}px;
   height: ${layer.bounds.height}px;
   ${styles}
+  background-image: url('${assetPath}/${layer.id}.png');
+  background-size: cover;
+  background-position: center;
 \`;`;
-        });
+      });
       
       const code = `import styled from 'styled-components';
 
@@ -31,13 +36,10 @@ ${components.join('\n\n')}
 // Usage example:
 /*
 <div style={{ position: 'relative', width: '${designInfo.width}px', height: '${designInfo.height}px' }}>
-  ${designInfo.layers
-    .filter(layer => layer.visible && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0)
-    .map(layer => {
-      const componentName = codeGeneratorService.toPascalCase(layer.name);
-      return `  <${componentName} />`;
-    })
-    .join('\n')}
+  ${filteredLayers.map(layer => {
+    const componentName = codeGeneratorService.toPascalCase(layer.name);
+    return `  <${componentName} />`;
+  }).join('\n')}
 </div>
 */`;
       
@@ -57,7 +59,7 @@ ${components.join('\n\n')}
   },
 
   // 生成 tailwindcss 代码
-  generateTailwindCSS: (designInfo) => {
+  generateTailwindCSS: (designInfo, selectedLayerIds = [], assetPath = '/src/assets/slices') => {
     try {
       console.log('Generating tailwindcss code...');
       
@@ -65,14 +67,16 @@ ${components.join('\n\n')}
         throw new Error('Invalid design information');
       }
       
-      const elements = designInfo.layers
-        .filter(layer => layer.visible && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0)
-        .map(layer => {
-          const tailwindClasses = codeGeneratorService.generateTailwindClasses(layer);
-          return `<div class="absolute left-[${layer.bounds.left}px] top-[${layer.bounds.top}px] w-[${layer.bounds.width}px] h-[${layer.bounds.height}px] ${tailwindClasses}">
+      const filteredLayers = selectedLayerIds.length > 0 
+        ? designInfo.layers.filter(layer => selectedLayerIds.includes(layer.id) && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0)
+        : designInfo.layers.filter(layer => layer.visible && !layer.isGroup && layer.bounds.width > 0 && layer.bounds.height > 0);
+      
+      const elements = filteredLayers.map(layer => {
+        const tailwindClasses = codeGeneratorService.generateTailwindClasses(layer);
+        return `<div class="absolute left-[${layer.bounds.left}px] top-[${layer.bounds.top}px] w-[${layer.bounds.width}px] h-[${layer.bounds.height}px] ${tailwindClasses}" style="background-image: url('${assetPath}/${layer.id}.png'); background-size: cover; background-position: center;">
   <!-- ${layer.name} -->
 </div>`;
-        });
+      });
       
       const code = `<div class="relative w-[${designInfo.width}px] h-[${designInfo.height}px]">
 ${elements.join('\n\n')}
@@ -130,12 +134,12 @@ ${elements.join('\n\n')}
   },
 
   // 生成完整的代码生成结果
-  generateCode: (designInfo, framework) => {
+  generateCode: (designInfo, framework, selectedLayerIds = [], assetPath = '/src/assets/slices') => {
     switch (framework.toLowerCase()) {
       case 'styled-components':
-        return codeGeneratorService.generateStyledComponents(designInfo);
+        return codeGeneratorService.generateStyledComponents(designInfo, selectedLayerIds, assetPath);
       case 'tailwindcss':
-        return codeGeneratorService.generateTailwindCSS(designInfo);
+        return codeGeneratorService.generateTailwindCSS(designInfo, selectedLayerIds, assetPath);
       default:
         return {
           success: false,

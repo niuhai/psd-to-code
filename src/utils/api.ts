@@ -127,13 +127,13 @@ export const parsePsd = async (filePath: string): Promise<{ success: boolean; ps
 };
 
 // 生成代码
-export const generateCode = async (filePath: string, framework: string): Promise<{ success: boolean; code: string; componentCount?: number; elementCount?: number }> => {
+export const generateCode = async (filePath: string, framework: string, selectedLayers?: string[], assetPath?: string): Promise<{ success: boolean; code: string; componentCount?: number; elementCount?: number }> => {
   const response = await fetch(`${API_BASE_URL}/generate/code`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ filePath, framework })
+    body: JSON.stringify({ filePath, framework, layers: selectedLayers, assetPath: assetPath })
   });
   
   return response.json();
@@ -180,6 +180,19 @@ export const cleanupSlices = async (): Promise<{ success: boolean; message: stri
 // 获取切片信息
 export const getSliceInfo = async (slicePath: string): Promise<{ success: boolean; info: any }> => {
   const response = await fetch(`${API_BASE_URL}/slice/info?slicePath=${encodeURIComponent(slicePath)}`);
+  
+  return response.json();
+};
+
+// 获取图层列表
+export const getLayers = async (filePath: string): Promise<{ success: boolean; layers: any[]; error?: string }> => {
+  const response = await fetch(`${API_BASE_URL}/generate/layers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ filePath })
+  });
   
   return response.json();
 };

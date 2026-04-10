@@ -28,9 +28,17 @@ const slicingService = {
       const allLayers = psdFile.tree().descendants();
       
       // 确定要切的图层
-      const targetLayers = layers.length > 0 
-        ? allLayers.filter(layer => layers.includes(layer.name))
-        : allLayers.filter(layer => layer.type === 'layer' && layer.visible && !layer.isGroup());
+      let targetLayers = [];
+      
+      if (layers.length > 0) {
+        // 通过图层ID或名称选择
+        targetLayers = allLayers.filter(layer => 
+          layers.includes(layer.id) || layers.includes(layer.name)
+        );
+      } else {
+        // 默认选择所有可见的非组图层
+        targetLayers = allLayers.filter(layer => layer.type === 'layer' && layer.visible && !layer.isGroup());
+      }
       
       console.log(`Processing ${targetLayers.length} layers for slicing`);
       

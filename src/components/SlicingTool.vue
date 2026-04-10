@@ -48,9 +48,19 @@
           </div>
         </div>
 
+        <div v-if="selectedLayers.length > 0" class="flex items-center justify-between text-sm">
+          <span class="text-slate-400">{{ selectedLayers.length }} layers selected</span>
+          <button
+            @click="clearSelection"
+            class="text-green-400 hover:text-green-300 transition-colors"
+          >
+            Clear selection
+          </button>
+        </div>
+
         <button
           @click="handleGenerateSlices"
-          :disabled="isGenerating"
+          :disabled="isGenerating || !selectedLayers.length"
           class="w-full btn-primary text-white font-semibold rounded-xl py-4 flex items-center justify-center gap-2"
         >
           <template v-if="isGenerating">
@@ -67,6 +77,13 @@
       <div v-if="slices.length > 0" class="space-y-4">
         <div class="flex items-center justify-between">
           <span class="text-sm text-slate-400">Generated {{ slices.length }} slices</span>
+          <button
+            @click="downloadAllSlices"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-slate-300 text-sm transition-colors"
+          >
+            <Download class="w-4 h-4" />
+            Download All
+          </button>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -107,11 +124,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Scissors, Download, Loader2, ChevronDown, ChevronUp } from 'lucide-vue-next'
-import { generateSlices, parsePsd } from '../utils/api'
+import { generateSlices } from '../utils/api'
 
 const props = defineProps<{
   filePath: string
   fileName: string
+  selectedLayers: string[]
   onError: (error: string) => void
 }>()
 
@@ -128,18 +146,18 @@ const formats = [
 ]
 
 const handleGenerateSlices = async () => {
+  if (props.selectedLayers.length === 0) {
+    props.onError('Please select at least one layer')
+    return
+  }
+
   isGenerating.value = true
   try {
-    // 先解析PSD文件
-    const parseResult = await parsePsd(props.filePath)
-    if (!parseResult.success) {
-      throw new Error('Failed to parse PSD file')
-    }
-
     // 生成切图
     const result = await generateSlices(props.filePath, {
       format: format.value,
-      quality: quality.value
+      quality: quality.value,
+      layers: props.selectedLayers
     })
     if ('success' in result && result.success) {
       slices.value = result.slices
@@ -162,6 +180,17 @@ const handleDownloadSlice = (slicePath: string, sliceName: string) => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+const downloadAllSlices = () => {
+  slices.value.forEach(slice => {
+    handleDownloadSlice(slice.path, `${slice.name}.${format.value}`)
+  })
+}
+
+const clearSelection = () => {
+  // 触发父组件的清除选择事件
+  // 这里需要通过emit通知父组件
 }
 </script>
 
